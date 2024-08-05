@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Clima y Mapa</title>
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i" rel="stylesheet" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="css/styles.css" rel="stylesheet" />
+        <!-- Leaflet CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+        }
+        h1, h2 {
+            color: #ffcc00;
+        }
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .left, .right {
+            flex: 1;
+            margin: 10px;
+        }
+        .left {
+            min-width: 300px;
+        }
+        .right {
+            min-width: 500px;
+            flex-basis: 60%;
+        }
+        .forecast {
+            margin-top: 20px;
+        }
+        .forecast div {
+            margin-bottom: 10px;
+        }
+        .hourly, .daily {
+            display: flex;
+            overflow-x: auto;
+        }
+        .hourly div{
+            min-width: 120px;
+            margin-top: 27px;
+            margin-right: 20px;
+            margin-left: 10px;
+            text-align: center;
+        }
+        .daily div {
+            min-width: 120px;
+            margin-top: 27px;
+            margin-right: 60px;
+            margin-left: 10px;
+            text-align: center;
+        }
+        .weather-icon {
+            width: 50px;
+        }
+        #chartContainer {
+            width: 100%;
+            height: 777px;
+            margin-top: 20px;
+            padding: 10px;
+        }
+        #map {
+            height: 313px;
+            margin-top: 10px;
+        }
+        .forecast-hourly, .forecast-daily {
+            margin-top: 60px;
+            width: 1200px;
+        }
+        </style>
+
+    </head>
+    <body style="background-image: url('assets/img/ox.png');">
+        <header>
+            <h1 class="site-heading text-center text-faded d-none d-lg-block">
+                <span class="site-heading-upper text-primary mb-3">Tu Portal de Información Agrícola</span>
+                <span class="site-heading-lower">Agro Market</span>
+            </h1>
+        </header>
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-dark py-lg-4" id="mainNav">
+            <div class="container">
+                <a class="navbar-brand text-uppercase fw-bold d-lg-none" href="index.html">Start Bootstrap</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="\cultivosApp\public">Inicio</a></li>
+                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="about.html">Acerca de</a></li>
+                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="clima.html">Clima</a></li>
+                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="products.html">Noticias</a></li>
+                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="store.html">Contactanos</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <br>
+        <br>
+
+        <h1>&nbsp;Información del Clima</h1>
+        <br>
+        <label for="city">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ingresa una ciudad:</label>
+        <input type="text" id="city" placeholder="Ciudad">
+        <button onclick="getWeather()">Obtener Clima</button>
+
+        <br>
+        <br>
+
+        <div class="content">
+            <div class="left">
+                <div id="weather"></div>
+                <div class="forecast-hourly" id="hourlyForecast"></div> <!-- Pronóstico por horas -->
+                <div class="forecast-daily" id="dailyForecast"></div> <!-- Pronóstico de 8 días -->
+            </div>
+            <div class="right">
+                <div id="map"></div>
+            </div>
+
+            <div id="chartContainer">
+                <canvas id="temperatureChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script>
+            const apiKey = '1d7752bec5163d1f26f13e25bf3050a8'; // Reemplaza con tu clave API de OpenWeatherMap
+            let map;
+            let temperatureChart;
+
+            document.addEventListener('DOMContentLoaded', () => {
+                getWeather('Lima');
+            });
+
+            async function getWeather(defaultCity = '') {
+                const cityInput = document.getElementById('city');
+                const city = defaultCity || cityInput.value;
+                if (city === '') {
+                    alert('Por favor, ingresa una ciudad.');
+                    return;
+                }
+
+                const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city},PE&appid=${apiKey}&units=metric&lang=es`;
+                const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city},PE&appid=${apiKey}&units=metric&lang=es`;
+
+                try {
+                    const weatherResponse = await fetch(weatherUrl);
+                    if (!weatherResponse.ok) {
+                        throw new Error('Ciudad no encontrada.');
+                    }
+                    const weatherData = await weatherResponse.json();
+                    displayWeather(weatherData);
+
+                    const forecastResponse = await fetch(forecastUrl);
+                    if (!forecastResponse.ok) {
+                        throw new Error('Pronóstico no disponible.');
+                    }
+                    const forecastData = await forecastResponse.json();
+                    displayForecast(forecastData);
+                    createTemperatureChart(forecastData);
+                    updateMap(weatherData.coord.lat, weatherData.coord.lon);
+                } catch (error) {
+                    document.getElementById('weather').innerHTML = `<p>Error: ${error.message}</p>`;
+                }
+            }
+
+            function displayWeather(data) {
+                const weatherDiv = document.getElementById('weather');
+                const temp = data.main.temp;
+                const feelsLike = data.main.feels_like;
+                const description = data.weather[0].description;
+                const city = data.name;
+                const country = data.sys.country;
+                const humidity = data.main.humidity;
+                const windSpeed = data.wind.speed;
+                const icon = data.weather[0].icon;
+
+                weatherDiv.innerHTML = `
+                    <h2>Clima en ${city}, ${country}</h2>
+                    <img src="http://openweathermap.org/img/wn/${icon}@2x.png" alt="${description}" class="weather-icon">
+                    <p>Temperatura: ${temp} °C</p>
+                    <p>Sensación térmica: ${feelsLike} °C</p>
+                    <p>Descripción: ${description}</p>
+                    <p>Humedad: ${humidity}%</p>
+                    <p>Viento: ${windSpeed} m/s</p>
+                `;
+            }
+
+            function displayForecast(data) {
+                const hourlyForecastDiv = document.getElementById('hourlyForecast');
+                const dailyForecastDiv = document.getElementById('dailyForecast');
+
+                const hourlyForecast = data.list.slice(0, 8).map(forecast => {
+                    const date = new Date(forecast.dt_txt);
+                    const hours = date.getHours();
+                    const temp = forecast.main.temp;
+                    const description = forecast.weather[0].description;
+                    const icon = forecast.weather[0].icon;
+                    return `<div><p>${hours}:00</p><img src="http://openweathermap.org/img/wn/${icon}@2x.png" alt="${description}" class="weather-icon"><p>${temp} °C</p><p>${description}</p></div>`;
+                }).join('');
+
+                const dailyForecast = data.list.filter((item, index) => index % 8 === 0).map(forecast => {
+                    const date = new Date(forecast.dt_txt);
+                    const day = date.toLocaleDateString('es-ES', { weekday: 'long' });
+                    const tempMin = forecast.main.temp_min;
+                    const tempMax = forecast.main.temp_max;
+                    const description = forecast.weather[0].description;
+                    const icon = forecast.weather[0].icon;
+                    return `<div><p>${day}</p><img src="http://openweathermap.org/img/wn/${icon}@2x.png" alt="${description}" class="weather-icon"><p>Máx: ${tempMax} °C</p><p>Mín: ${tempMin} °C</p><p>${description}</p></div>`;
+                }).join('');
+
+                hourlyForecastDiv.innerHTML = `
+                    <div class="forecast">
+                        <h2>Pronóstico por horas</h2>
+                        <div class="hourly">${hourlyForecast}</div>
+                    </div>
+                `;
+
+                dailyForecastDiv.innerHTML = `
+                    <div class="forecast">
+                        <h2>Pronóstico de 8 días</h2>
+                        <div class="daily">${dailyForecast}</div>
+                    </div>
+                `;
+            }
+
+            function createTemperatureChart(data) {
+                const ctx = document.getElementById('temperatureChart').getContext('2d');
+                const labels = data.list.slice(0, 8).map(forecast => {
+                    const date = new Date(forecast.dt_txt);
+                    return `${date.getHours()}:00`;
+                });
+                const temperatures = data.list.slice(0, 8).map(forecast => forecast.main.temp);
+
+                if (temperatureChart) {
+                    temperatureChart.destroy(); // Destruye el gráfico existente
+                }
+
+                temperatureChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Temperatura (°C)',
+                            data: temperatures,
+                            borderColor: 'rgba(255, 204, 0, 1)',
+                            backgroundColor: 'rgba(255, 204, 0, 0.2)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateMap(lat, lon) {
+                if (!map) {
+                    map = L.map('map').setView([lat, lon], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    }).addTo(map);
+                } else {
+                    map.setView([lat, lon], 13);
+                }
+
+                L.marker([lat, lon]).addTo(map)
+                    .bindPopup('Ubicación seleccionada')
+                    .openPopup();
+            }
+        </script>
+
+        <br>
+        <br>
+
+        <footer class="footer text-faded text-center py-5">
+            <div class="container"><p class="m-0 small">Copyright &copy; Your Website 2023</p></div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="js/scripts.js"></script>
+    </body>
+</html>
