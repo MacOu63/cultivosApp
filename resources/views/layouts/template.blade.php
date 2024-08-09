@@ -12,6 +12,27 @@
         <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i" rel="stylesheet" />
         <!-- Core theme CSS (includes Bootstrap)-->
         <link href="css/styles.css" rel="stylesheet" />
+
+        <style>
+                .navbar-nav .nav-link {
+                color: #ddd !important; /* Color de texto por defecto para las opciones */
+                font-size: 16px;
+                text-transform: uppercase;
+                padding: 8px 12px;
+                transition: color 0.3s ease; /* Transición suave entre estados */
+                }
+
+                /* Estilos para la opción activa */
+                .navbar-nav .nav-link.active {
+                color: #07611D !important; /* Color dorado para la opción activa */
+                font-weight: bold; /* Hace que el texto sea más grueso */
+                }
+
+                /* Efecto hover para cualquier opción del menú */
+                .navbar-nav .nav-link:hover {
+                color: #07611D !important; /* Cambia el color al pasar el cursor */
+                }
+        </style>
     </head>
     <body style="
     background-image: url('assets/img/ox.png');">
@@ -22,22 +43,26 @@
             </h1>
         </header>
         <!-- Navigation-->
-         
+
         <nav class="navbar navbar-expand-lg navbar-dark py-lg-4" id="mainNav">
-            <div class="container">
-                <a class="navbar-brand text-uppercase fw-bold d-lg-none" href="index.html">Start Bootstrap</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mx-auto">
-                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="\cultivosApp\public">Inicio</a></li>
-                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="about.html">Acerca de</a></li>
-                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="clima.html">Clima</a></li>
-                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="products.html">Noticias</a></li>
-                        <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="store.html">Contactanos</a></li>
-                    </ul>
-                </div>
+        <div class="container">
+            <a class="navbar-brand text-uppercase fw-bold d-lg-none" href="index.html">Start Bootstrap</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item px-lg-3"><a class="nav-link text-uppercase active" href="\cultivosApp\public">Inicio</a></li>
+                    <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="about.html">Acerca de</a></li>
+                    <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="clima.html">Clima</a></li>
+                    <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="products.html">Noticias</a></li>
+                    <li class="nav-item px-lg-3"><a class="nav-link text-uppercase" href="contactanos.html">Contactanos</a></li>
+                </ul>
             </div>
+        </div>
         </nav>
+
+
 
         <!--<section class="page-section clearfix">
             <div class="container">

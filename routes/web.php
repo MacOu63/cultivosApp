@@ -1,6 +1,13 @@
 <?php
 
+use App\Mail\ContactanosMailable;
+
+use App\Http\Controllers\ContactanosController;
+
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -23,3 +30,19 @@ Route::resource('/precios', App\Http\Controllers\PrecioController::class)->middl
 Route::resource('/preferencias', App\Http\Controllers\PreferenciaController::class)->middleware('auth');
 Route::resource('/usuarios', App\Http\Controllers\UsuarioController::class)->middleware('auth');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+/*Route::get('contactanos', function () {
+
+    Mail::to('velasquez@cultivoApp.com')
+        ->send(new contactanosMailable);
+
+    return "Mensaje enviado";
+
+})->name('contactanos'); */
+
+Route::get('contactanos',[ContactanosController::class, 'index'])
+     ->name('contactanos.index');
+
+Route::post('contactanos', [ContactanosController::class, 'store'])
+     ->name('contactanos.store');
+
