@@ -14,12 +14,38 @@ class CultivoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index(Request $request)
     {
-        $cultivos = Cultivo::paginate();
+        // Validar que el término de búsqueda solo contenga letras y espacios
+        $request->validate([
+            'search' => 'nullable|regex:/^[\pL\s]+$/u'  // Acepta letras y espacios
+        ]);
 
-        return view('cultivo.index', compact('cultivos'))
-            ->with('i', ($request->input('page', 1) - 1) * $cultivos->perPage());
+        $search = $request->input('search'); // Captura el término de búsqueda
+
+        // Verificar si el término de búsqueda existe en los cultivos
+        $cultivoExists = Cultivo::where('nombre', 'like', "%{$search}%")->exists();
+
+        if ($search && !$cultivoExists) {
+            // Añadir un mensaje de advertencia si no se encuentra el cultivo
+            $warningMessage = 'No se encontró ningún cultivo con el nombre ingresado.';
+        } else {
+            $warningMessage = null;
+        }
+
+        // Capturar la cantidad de resultados por página seleccionada, por defecto 10
+        $perPage = $request->input('results_per_page', 10);
+
+        // Aplicar el filtro de búsqueda si existe
+        $cultivos = Cultivo::when($search, function ($query, $search) {
+                return $query->where('nombre', 'like', "%{$search}%");
+            })
+            ->paginate($perPage); // Utiliza la cantidad seleccionada para la paginación
+
+        // Devolver la vista con los datos paginados y el mensaje de advertencia
+        return view('cultivo.index', compact('cultivos', 'search', 'warningMessage'))
+            ->with('i', ($request->input('page', 1) - 1) * $cultivos->perPage())
+            ->with('results_per_page', $perPage); // Para que el valor seleccionado persista en la vista
     }
 
     /**
@@ -39,8 +65,11 @@ class CultivoController extends Controller
     {
         Cultivo::create($request->validated());
 
+        // Guardar un mensaje de éxito en la sesión
+        session()->flash('success', '¡Cultivo creado exitosamente!');
+
         return Redirect::route('cultivos.index')
-            ->with('success', 'Cultivo created successfully.');
+            ->with('success', '¡Cultivo creado exitosamente!');
     }
 
     /**
@@ -70,15 +99,20 @@ class CultivoController extends Controller
     {
         $cultivo->update($request->validated());
 
+        // Guardar un mensaje de éxito en la sesión
+        session()->flash('success', '¡Cultivo actualizado exitosamente!');
+
         return Redirect::route('cultivos.index')
-            ->with('success', 'Cultivo updated successfully');
+            ->with('success', '¡Cultivo actualizado exitosamente!');
     }
 
     public function destroy($id): RedirectResponse
     {
         Cultivo::find($id)->delete();
 
+        session()->flash('success', '¡Cultivo eliminado exitosamente!');
+
         return Redirect::route('cultivos.index')
-            ->with('success', 'Cultivo deleted successfully');
+            ->with('success', '¡Cultivo eliminado exitosamente!');
     }
 }

@@ -5,24 +5,55 @@
 @endsection
 
 @section('content')
-    <section class="content container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-
-                <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">{{ __('Create') }} Precio</span>
-                    </div>
-                    <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('precios.store') }}"  role="form" enctype="multipart/form-data">
-                            @csrf
-
-                            @include('precio.form')
-
-                        </form>
-                    </div>
+<section class="content container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-default">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="card-title">{{ __('Crear') }} nuevo Precio</span>
+                    <a class="btn btn-primary btn-sm" href="{{ route('precios.index') }}"> {{ __('Regresar') }}</a>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ route('precios.store') }}" role="form" enctype="multipart/form-data">
+                        @csrf
+                        @include('precio.form')
+                    </form>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
+
+<style>
+    .card-title{
+        color: #fff;
+    }
+
+    .card-body {
+        background-color: #333; /* Adjust the color to match your sidebar */
+        color: #fff; /* This will change the text color to white */
+    }
+    input, select, textarea {
+        background-color: #555; /* Lighter shade for visibility */
+        color: #fff;
+        border: 1px solid #777;
+        padding: 10px;
+        border-radius: 4px;
+    }
+    button {
+        background-color: #444; /* Dark background for the button */
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #666; /* Slightly lighter on hover */
+    }
+    .card {
+        background-color: #222; /* Dark background for the card */
+        border: 1px solid #444; /* Slight border to define the card edges */
+    }
+</style>
 @endsection

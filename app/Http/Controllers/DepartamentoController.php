@@ -16,10 +16,36 @@ class DepartamentoController extends Controller
      */
     public function index(Request $request): View
     {
-        $departamentos = Departamento::paginate();
+        // Validar que el término de búsqueda solo contenga letras y espacios
+        $request->validate([
+            'search' => 'nullable|regex:/^[\pL\s]+$/u'  // Acepta letras y espacios
+        ]);
 
-        return view('departamento.index', compact('departamentos'))
-            ->with('i', ($request->input('page', 1) - 1) * $departamentos->perPage());
+        $search = $request->input('search'); // Captura el término de búsqueda
+
+        // Verificar si el término de búsqueda existe en los departamentos
+        $departamentoExists = Departamento::where('nombre', 'like', "%{$search}%")->exists();
+
+        if ($search && !$departamentoExists) {
+            // Añadir un mensaje de advertencia si no se encuentra el departamento
+            $warningMessage = 'No se encontró ningún departamento con el nombre ingresado.';
+        } else {
+            $warningMessage = null;
+        }
+
+        // Capturar la cantidad de resultados por página seleccionada, por defecto 10
+        $perPage = $request->input('results_per_page', 7);
+
+        // Aplicar el filtro de búsqueda si existe
+        $departamentos = Departamento::when($search, function ($query, $search) {
+                return $query->where('nombre', 'like', "%{$search}%");
+            })
+            ->paginate($perPage); // Utiliza la cantidad seleccionada para la paginación
+
+        // Devolver la vista con los datos paginados y el mensaje de advertencia
+        return view('departamento.index', compact('departamentos', 'search', 'warningMessage'))
+            ->with('i', ($request->input('page', 1) - 1) * $departamentos->perPage())
+            ->with('results_per_page', $perPage); // Para que el valor seleccionado persista en la vista
     }
 
     /**
@@ -40,7 +66,7 @@ class DepartamentoController extends Controller
         Departamento::create($request->validated());
 
         return Redirect::route('departamentos.index')
-            ->with('success', 'Departamento created successfully.');
+            ->with('success', '¡Departamento creado exitosamente!');
     }
 
     /**
@@ -71,7 +97,7 @@ class DepartamentoController extends Controller
         $departamento->update($request->validated());
 
         return Redirect::route('departamentos.index')
-            ->with('success', 'Departamento updated successfully');
+            ->with('success', '¡Departamento actualizado exitosamente!');
     }
 
     public function destroy($id): RedirectResponse
@@ -79,6 +105,6 @@ class DepartamentoController extends Controller
         Departamento::find($id)->delete();
 
         return Redirect::route('departamentos.index')
-            ->with('success', 'Departamento deleted successfully');
+            ->with('success', '¡Departamento eliminado exitosamente!');
     }
 }

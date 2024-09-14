@@ -22,9 +22,11 @@ class UsuarioRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'nombre_usuario' => 'nullable|string',
+            'apellido_usuario' => 'nullable|string',
 			'rol' => 'required|string',
 			'telefono' => 'required|string',
-			'pin' => 'required|string',
+			'password' => 'nullable|string',
         ];
     }
 }

@@ -3,38 +3,57 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | Login Controller
-    |--------------------------------------------------------------------------
-    |
-    | This controller handles authenticating users for the application and
-    | redirecting them to your home screen. The controller uses a trait
-    | to conveniently provide its functionality to your applications.
-    |
-    */
-
-    use AuthenticatesUsers;
-
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
-    protected $redirectTo = '/home';
-
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
-    public function __construct()
+    // Mostrar el formulario de inicio de sesión
+    public function showLoginForm()
     {
-        $this->middleware('guest')->except('logout');
-        $this->middleware('auth')->only('logout');
+        return view('auth.login');
+    }
+
+    // Manejar la solicitud de inicio de sesión
+    public function login(Request $request)
+    {
+        $credentials = $request->only('telefono', 'password');
+
+        $validator = Validator::make($credentials, [
+            'telefono' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return Redirect::back()->withErrors($validator)->withInput();
+        }
+
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            // Redirige según el rol del usuario
+            if ($user->rol === 'admin') {
+                return redirect()->route('usuarios.index'); // Ruta al CRUD
+            } elseif ($user->rol === 'user') {
+                return redirect()->route('welcome'); // Ruta a la página de bienvenida
+            }
+        }
+
+        return Redirect::back()->withErrors([
+            'telefono' => 'Número de teléfono o contraseña incorrectos.',
+        ])->withInput();
+    }
+
+    // Manejar el cierre de sesión
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        // Redirige a la página de login después de cerrar la sesión
+        return redirect()->route('login');
     }
 }

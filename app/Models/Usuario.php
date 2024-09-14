@@ -2,50 +2,42 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Mchev\Banhammer\Traits\Bannable; // Importar el trait Bannable
 
-/**
- * Class Usuario
- *
- * @property $id
- * @property $rol
- * @property $telefono
- * @property $pin
- * @property $created_at
- * @property $updated_at
- *
- * @property Consulta[] $consultas
- * @property Preferencia[] $preferencias
- * @package App
- * @mixin \Illuminate\Database\Eloquent\Builder
- */
-class Usuario extends Model
+class Usuario extends Authenticatable
 {
-    
-    protected $perPage = 20;
+    use HasFactory, Notifiable, Bannable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = ['rol', 'telefono', 'pin'];
+    protected $fillable = [
+        'nombre_usuario',
+        'apellido_usuario',
+        'image',
+        'rol',
+        'telefono',
+        'password',
+        'banned',
+    ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
 
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function consultas()
+    // Agregar el cast para el campo banned
+    protected $casts = [
+        'banned' => 'boolean',
+    ];
+
+    public function getAuthPassword()
     {
-        return $this->hasMany(\App\Models\Consulta::class, 'id', 'usuarios_id');
+        return $this->password;
     }
-    
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function preferencias()
+
+    public function getAuthIdentifierName()
     {
-        return $this->hasMany(\App\Models\Preferencia::class, 'id', 'usuarios_id');
+        return 'telefono';
     }
-    
 }

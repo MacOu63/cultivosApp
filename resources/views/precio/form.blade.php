@@ -2,13 +2,13 @@
     <div class="col-md-12">
         
         <div class="form-group mb-2 mb20">
-            <label for="precio" class="form-label">{{ __('Precio') }}</label>
-            <input type="text" name="precio" class="form-control @error('precio') is-invalid @enderror" value="{{ old('precio', $precio?->precio) }}" id="precio" placeholder="Precio">
+            <label for="precio" class="form-label">{{ __('Precio:') }}</label>
+            <input type="text" name="precio" class="form-control @error('precio') is-invalid @enderror" value="{{ old('precio', $precio?->precio) }}" id="precio" placeholder="Ingresar el precio:">
             {!! $errors->first('precio', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
         </div>
 
         <div class="form-group mb-2 mb20">
-        <label for="cultivos_id" class="form-label">{{ __('Cultivos Id') }}</label>
+        <label for="cultivos_id" class="form-label">{{ __('Cultivo:') }}</label>
         <select name="cultivos_id" id="cultivos_id" class="form-control{{ $errors->has('cultivos_id') ? ' is-invalid' : '' }}">
            @foreach($cultivo as $id => $nombre)
              <option value="{{ $id }}"{{ $id == old('cultivos_id', $precio?->cultivos_id) ? ' selected' : '' }}>{{ $nombre }}</option>
@@ -22,7 +22,7 @@
         </div>
 
         <div class="form-group mb-2 mb20">
-        <label for="departamentos_id" class="form-label">{{ __('Departamentos Id') }}</label>
+        <label for="departamentos_id" class="form-label">{{ __('Departamento:') }}</label>
         <select name="departamentos_id" id="departamentos_id" class="form-control{{ $errors->has('departamentos_id') ? ' is-invalid' : '' }}">
             @foreach($departamento as $id => $nombre)
              <option value="{{ $id }}"{{ $id == old('departamentos_id', $precio?->departamentos_id) ? ' selected' : '' }}>{{ $nombre }}</option>
@@ -38,6 +38,14 @@
 
     </div>
     <div class="col-md-12 mt20 mt-2">
-        <button type="submit" class="btn btn-primary">{{ __('Submit') }}</button>
+        <button type="submit" class="btn btn-primary">{{ __('Guardar') }}</button>
     </div>
 </div>
+
+<script>
+    document.getElementById('precio').addEventListener('input', function (e) {
+        let input = e.target;
+        // Permitir solo números y un único punto
+        input.value = input.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
+    });
+</script>
